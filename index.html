@@ -21,81 +21,85 @@
         }
 
         .container {
-            background-color: rgba(255, 253, 245, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 80%;
-            max-width: 600px;
+            background-color: rgba(255, 253, 245, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            width: 85%;
+            max-width: 700px;
             text-align: center;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
         h1 {
-            font-size: 3rem;
-            margin-bottom: 30px;
+            font-size: 4rem;
+            margin-bottom: 40px;
             color: #6b5b4b;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            letter-spacing: 2px;
         }
 
         .result {
-            font-size: 2.5rem;
-            min-height: 120px;
+            font-size: 3.5rem;
+            min-height: 150px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 30px 0;
-            padding: 20px;
+            margin: 40px 0;
+            padding: 30px;
             background-color: rgba(255, 255, 255, 0.7);
-            border-radius: 10px;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
+            border: 2px solid rgba(212, 185, 150, 0.5);
         }
 
-        .buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
+        .button-container {
+            margin-top: 30px;
         }
 
         button {
             background-color: #d4b996;
             color: #5a4a3a;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.5rem;
-            border-radius: 50px;
+            padding: 20px 40px;
+            font-size: 2rem;
+            border-radius: 60px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            min-width: 250px;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         button:hover {
             background-color: #c0a080;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         button:active {
-            transform: translateY(1px);
+            transform: translateY(2px);
         }
 
-        .animation {
-            animation: flash 0.2s infinite;
+        .flashing {
+            animation: flash 0.15s infinite;
         }
 
         @keyframes flash {
             0% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.6; }
             100% { opacity: 1; }
         }
 
         .final-choice {
-            animation: pulse 0.5s 3, enlarge 0.5s forwards;
+            animation: pulse 0.8s 3, enlarge 0.5s forwards;
             color: #8b4513;
             font-weight: bold;
+            background-color: rgba(255, 253, 245, 0.9);
+            box-shadow: 0 0 30px rgba(212, 185, 150, 0.8);
         }
 
         @keyframes pulse {
@@ -105,7 +109,7 @@
         }
 
         @keyframes enlarge {
-            to { font-size: 3rem; }
+            to { font-size: 4rem; }
         }
     </style>
 </head>
@@ -113,74 +117,81 @@
     <div class="container">
         <h1>午餐吃啥</h1>
         <div class="result" id="result">點擊下方按鈕開始</div>
-        <div class="buttons">
-            <button id="startBtn">開始隨機</button>
-            <button id="decideBtn">決定午餐</button>
+        <div class="button-container">
+            <button id="actionBtn">開始隨機</button>
         </div>
     </div>
 
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
         const foods = [
-            "牛肉麵", 
-            "烏醋乾麵", 
-            "魷魚羹麵", 
-            "重慶抄手", 
-            "肯德基", 
-            "麥當勞", 
-            "丼飯", 
-            "土托魚羹", 
-            "同客餃子館", 
-            "八方雲集", 
-            "咖哩飯"
+            "🍜 牛肉麵", 
+            "🍝 烏醋乾麵", 
+            "🥣 魷魚羹麵", 
+            "🥟 重慶抄手", 
+            "🍗 肯德基", 
+            "🍔 麥當勞", 
+            "🍱 丼飯", 
+            "🐟 土托魚羹", 
+            "🍛 同客", 
+            "🥟 八方雲集", 
+            "🍛 咖哩飯"
         ];
 
-        const resultEl = document.getElementById('result');
-        const startBtn = document.getElementById('startBtn');
-        const decideBtn = document.getElementById('decideBtn');
+        const resultDiv = document.getElementById('result');
+        const actionBtn = document.getElementById('actionBtn');
 
         let isRandomizing = false;
         let intervalId = null;
+        let speedUpIntervalId = null; // 這是新加的
         let currentIndex = 0;
+        let speed = 100;
 
-        startBtn.addEventListener('click', () => {
-            if (isRandomizing) return;
-            
-            isRandomizing = true;
-            resultEl.textContent = foods[0];
-            resultEl.classList.add('animation');
-            
-            currentIndex = 0;
-            intervalId = setInterval(() => {
-                currentIndex = (currentIndex + 1) % foods.length;
-                resultEl.textContent = foods[currentIndex];
-            }, 100);
-        });
-
-        decideBtn.addEventListener('click', () => {
+        actionBtn.addEventListener('click', function() {
             if (!isRandomizing) {
-                // 如果沒有先點擊"開始隨機"，直接點擊"決定午餐"
-                const randomFood = foods[Math.floor(Math.random() * foods.length)];
-                resultEl.textContent = randomFood;
-                resultEl.classList.add('final-choice');
+                isRandomizing = true;
+                actionBtn.textContent = "決定午餐";
+                resultDiv.classList.add('flashing');
+
+                currentIndex = 0;
+                resultDiv.textContent = foods[currentIndex];
+
+                intervalId = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % foods.length;
+                    resultDiv.textContent = foods[currentIndex];
+                }, speed);
+
+                speedUpIntervalId = setInterval(() => {
+                    if (speed > 30) {
+                        speed -= 10;
+                        clearInterval(intervalId);
+                        intervalId = setInterval(() => {
+                            currentIndex = (currentIndex + 1) % foods.length;
+                            resultDiv.textContent = foods[currentIndex];
+                        }, speed);
+                    } else {
+                        clearInterval(speedUpIntervalId);
+                    }
+                }, 500);
+
+            } else {
+                clearInterval(intervalId);
+                clearInterval(speedUpIntervalId); // 加這行來停止速度加快的部分
+                isRandomizing = false;
+                actionBtn.textContent = "開始隨機";
+                resultDiv.classList.remove('flashing');
+
+                const finalIndex = Math.floor(Math.random() * foods.length);
+                resultDiv.textContent = foods[finalIndex];
+                resultDiv.classList.add('final-choice');
+                speed = 100;
+
                 setTimeout(() => {
-                    resultEl.classList.remove('final-choice');
-                }, 1500);
-                return;
+                    resultDiv.classList.remove('final-choice');
+                }, 3000);
             }
-            
-            clearInterval(intervalId);
-            isRandomizing = false;
-            resultEl.classList.remove('animation');
-            
-            // 最終隨機選擇
-            const finalIndex = Math.floor(Math.random() * foods.length);
-            resultEl.textContent = foods[finalIndex];
-            resultEl.classList.add('final-choice');
-            
-            setTimeout(() => {
-                resultEl.classList.remove('final-choice');
-            }, 1500);
         });
-    </script>
+    });
+</script>
 </body>
 </html>
